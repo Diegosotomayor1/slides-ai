@@ -1,86 +1,72 @@
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
-import MindElixirReact from './MindElixirReact';
-import MindElixir from 'mind-elixir';
-import { Input } from './ui/input';
-import { completePartialMindData } from '@/app/utils/completePartialMindData';
-import { MindElixirDataWithSummary } from '@/types';
 import { themeMindMap } from '@/constants';
+import { MindElixirDataWithSummary } from '@/types';
+import axios from 'axios';
+import MindElixir from 'mind-elixir';
+import { FormEvent, useRef, useState } from 'react';
+import MindElixirReact from './MindElixirReact';
+import { Input } from './ui/input';
 
 export default function MindMapSection() {
   const ME = useRef(null);
-  const [streamData, setStreamData] = useState<MindElixirDataWithSummary | null>(null);
+  const [objectData, setObjectData] = useState<MindElixirDataWithSummary | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Función para manejar el envío del formulario y la recepción de datos en streaming
+  // Función para manejar el envío del formulario y la recepción de datos
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const prompt = formData.get('prompt') as string;
-  
-    try {
-      const response = await fetch('/api/mindmap', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: prompt }),
-      });
-  
-      if (!response.body) {
-        throw new Error('No se pudo obtener el cuerpo de la respuesta');
-      }
-  
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedData = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-  
-        // Decodifica el fragmento recibido
-        accumulatedData += decoder.decode(value, { stream: true });
-        
-        // Procesa cada línea de JSON completa
-        const lines = accumulatedData.split('\n');
-        
-        for (let i = 0; i < lines.length - 1; i++) {
-          const line = lines[i];
-          
-          if (!line.trim()) continue; // Ignora líneas vacías
-          
-          try {
-            const jsonData = JSON.parse(line);
-            const partialMindData = completePartialMindData(jsonData);
-            console.log('partialMindData', partialMindData);
-            setStreamData(partialMindData);
-          } catch {
-            // Es normal que JSON.parse falle si los datos no están completos todavía
-            continue;
-          }
-        }
-        
-        // Mantén solo la última línea en `accumulatedData` en caso de que esté incompleta
-        accumulatedData = lines[lines.length - 1];
-      }
+    if (!prompt) {
+      alert('Por favor, introduce un prompt');
+      return;
+    }
+
+    setLoading(true); // Activa el estado de carga
+
+    try {
+      // Envía la solicitud al backend usando axios
+      const response = await axios.post('/api/mindmap', { message: prompt });
+
+      // Procesa la respuesta y actualiza el estado con el objeto de datos recibido
+      const data = response.data;
+      setObjectData(data);
     } catch (error) {
-      console.error('Error al recibir los datos en streaming:', error);
+      console.error("Error al recibir los datos:", error);
+      alert('Ocurrió un error al procesar el mapa mental. Por favor, intenta de nuevo.');
+    } finally {
+      setLoading(false); // Desactiva el estado de carga al finalizar
     }
   };
-  
 
   return (
-    <div className="block m-auto">
-      <form onSubmit={handleSubmit}>
-        <Input type="text" name="prompt" id="prompt" placeholder="Escribe algo" />
+    <div className="flex flex-col items-center gap-4 p-6">
+      <form onSubmit={handleSubmit} className="flex gap-4 w-full max-w-md">
+        <Input type="text" name="prompt" id="prompt" placeholder="Escribe algo" className="flex-grow" disabled={loading} />
+        <button
+          type="submit"
+          className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition disabled:opacity-50"
+          disabled={loading}
+        >
+          {loading ? 'Cargando...' : 'Enviar'}
+        </button>
       </form>
-      {streamData && (
+
+      {/* Loader durante la carga */}
+       
+        { loading && <div className="flex items-center justify-center w-full mt-8 ">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-l-blue-200" />
+        </div>}
+ 
+      {/* Renderiza el mapa mental después de recibir los datos */}
+      {objectData && !loading && (
         <MindElixirReact
           ref={ME}
-          data={streamData}
+          data={objectData}
           options={{ direction: MindElixir.SIDE, editable: false, theme: themeMindMap }}
-          className="w-full h-[calc(100vh-200px)] mx-auto"
+          className="w-screen h-[500px] mt-8"
         />
       )}
     </div>

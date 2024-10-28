@@ -1,9 +1,9 @@
 'use client'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import MindElixir, { MindElixirInstance } from 'mind-elixir'
 import { forwardRef, useEffect, useState } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { MindElixirDataWithSummary } from '../types'
 
 function MindElixirReact(
@@ -23,7 +23,6 @@ function MindElixirReact(
     const me = new MindElixir({
       el: ref.current,
       ...options,
-      editable: false,
     });
 
     me.init(data as any);
@@ -33,10 +32,9 @@ function MindElixirReact(
     me.bus.addListener('selectNode', (node, e) => {
       const { summary } = node as MindElixirDataWithSummary['nodeData'];
       
-      console.log('event', e);
       if (node && summary) {
         setSelectedSummary(summary);
-        setPopoverPosition({ x: e?.clientX || 0, y: (e?.clientY  || 0) - 50 }); // Posicionar el Popover en la posición del clic
+        setPopoverPosition({ x: e?.pageX || 0, y: (e?.pageY  || 0) - 50 }); // Posicionar el Popover en la posición del clic
         setIsPopoverOpen(true); // Abre el Popover al seleccionar un nodo
       }
     });
@@ -50,7 +48,7 @@ function MindElixirReact(
       {isPopoverOpen && (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
-            <div style={{ position: 'absolute', left: popoverPosition.x, top: popoverPosition.y }}></div>
+            <div style={{ position: 'absolute', left: popoverPosition.x, top: popoverPosition.y }} className='z-50'></div>
           </PopoverTrigger>
           <PopoverContent>
             <p className='text-sm'>{selectedSummary}</p>
