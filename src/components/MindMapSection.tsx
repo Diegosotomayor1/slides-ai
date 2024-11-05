@@ -5,8 +5,11 @@ import { MindElixirDataWithSummary } from '@/types';
 import axios from 'axios';
 import MindElixir from 'mind-elixir';
 import { FormEvent, useRef, useState } from 'react';
-import MindElixirReact from './MindElixirReact';
 import { Input } from './ui/input';
+import MindElixirReact from './MindElixirReact';
+
+// Carga dinámica del componente MindElixirReact solo en el cliente
+
 
 export default function MindMapSection() {
   const ME = useRef(null);
@@ -65,7 +68,7 @@ export default function MindMapSection() {
         <MindElixirReact
           ref={ME}
           data={objectData}
-          options={{ direction: MindElixir.SIDE, editable: false, theme: themeMindMap }}
+          options={{ direction: MindElixir.SIDE, editable: true, theme: themeMindMap }}
           className="w-screen h-[500px] mt-8"
         />
       )}

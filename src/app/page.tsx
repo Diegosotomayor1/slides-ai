@@ -1,5 +1,8 @@
-// src/components/App.tsx
-import MindMapSection from '@/components/MindMapSection';
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const MindMapSection = dynamic(() => import('../components/MindMapSection'), { ssr: false });
 
 export default function Home() {
   return (

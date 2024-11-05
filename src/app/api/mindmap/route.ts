@@ -12,7 +12,6 @@ export async function POST(req: Request) {
 
     // Genera el objeto completo en una sola respuesta
     const response = await getObjectAI(message);
-    console.log("response", response);
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: {

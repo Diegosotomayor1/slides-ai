@@ -39,7 +39,6 @@ function MindElixirReact(
       }
     });
 
-    console.log('created', ref.current.instance);
   }, [ref, options, data]);
 
   return (

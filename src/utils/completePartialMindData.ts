@@ -38,7 +38,5 @@ export function completePartialMindData(
     },
   };
 
-  console.log({ completedData });
-
   return completedData;
 }
