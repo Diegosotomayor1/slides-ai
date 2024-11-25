@@ -1,24 +1,65 @@
-import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { MindElixirDataWithSummarySchema } from "../types";
+import { generateText } from "ai";
 
-export const getObjectAI = async (message: string) => {
-  const { object } = await generateObject({
-    model: openai("gpt-4o"),
+export const getHTMLAI = async (message: string) => {
+  const { text } = await generateText({
+    model: openai("gpt-4o-2024-08-06"),
     system: `
-        Genera un mapa mental educativo basado en el tema proporcionado en el prompt. El mapa mental debe seguir estas especificaciones:
-        - Estructura: Debe entenderse como un curso completo y por lo que tendrá muchos subtemas y subtemas en sus subtemas. Que tenga muchos subtemas y esos subtemas tengan muchas definiciones como subnodos.
-        - Formato: El resultado debe ser un **objeto JSON** que siga el esquema de MindElixir, donde cada nodo tiene un **id**, **topic**, **summary** y una lista de **children** que dentro de ellas tendrá otros **children**.
-        - Contenido: Los **summary** deben ser informativos, detallados y en un solo párrafo, proporcionando una introducción o contexto relevante para el tema de cada nodo.
-        - Enriquecimiento: Utiliza **emojis** en los temas de los dos primeros niveles para hacer el mapa mental más visual. Los resúmenes deben contextualizar y dar sentido a la relación entre cada nivel del tema.
-        - Complejidad: El mapa mental debe ser de gran tamaño con varios nodos y niveles para que sea legible y ordenado.
-        
-        El objetivo es que este mapa mental sea útil para comprender el tema de manera estructurada y progresiva, con nodos bien definidos y con suficiente detalle en cada subtema.
-      `,
-    schema: MindElixirDataWithSummarySchema,
-    output: "object",
+        Contexto: Estoy creando una presentación educativa en Reveal.js. La respuesta que quiero es un contenido estructurado en HTML del contexto/tema que te da el prompt con las siguientes características:
+
+        Cada diapositiva debe ser un <section> con atributos de Reveal.js:
+
+        data-background-color: Define un color único para el fondo de cada diapositiva.
+        data-transition: Usa transiciones variadas como fade, slide, zoom, etc.
+        Incluye estilos en línea (como style="color: #fff;") si el fondo es oscuro.
+        Elementos específicos de Reveal.js:
+
+        Fragmentos: Usa data-fragment para que los puntos en listas o elementos aparezcan progresivamente.
+        KaTeX: Incluye fórmulas matemáticas renderizadas con delimitadores \[ ... \] para ecuaciones en bloque y \( ... \) para ecuaciones en línea.
+        Fondos personalizados: Alterna colores suaves y fuertes.
+        Incluye transiciones específicas por diapositiva.
+        Tema: El tema de la presentación es "Generación de Interfaces de Usuario (UI) con Inteligencia Artificial".
+
+        Estructura esperada:
+
+        Título
+        Índice
+        Introducción al tema
+        Ventajas y desafíos
+        Aplicaciones prácticas
+        Fórmulas matemáticas relacionadas
+        Reflexión y futuro
+        Diapositiva final de agradecimiento
+        Formato de salida: Proporciónalo en un bloque de HTML puro, como el siguiente ejemplo:
+
+        html
+        Copiar código
+        <section data-background-color="#ffefd5" data-transition="fade">
+          <h1>Generación de UI con AI</h1>
+          <p><em>Revolucionando el diseño de interfaces</em></p>
+        </section>
+        <section data-background-color="#6a5acd" data-transition="zoom">
+          <h2>Índice</h2>
+          <ul>
+            <li>Introducción</li>
+            <li>Ventajas y Desafíos</li>
+            <li>Aplicaciones Prácticas</li>
+            <li>Ecuaciones Matemáticas</li>
+            <li>Reflexión y Futuro</li>
+          </ul>
+        </section>
+        Detalles Adicionales:
+
+        Usa un lenguaje formal y profesional.
+        Si es posible, alterna entre colores suaves (pasteles) y colores oscuros (fuerte contraste).
+        Genera solo el contenido en HTML completo con las características solicitadas.`,
     prompt: message,
   });
 
-  return object;
+  let html = text;
+  if (text.includes("```html")) {
+    html = text.split("```html")[1].split("```")[0];
+  }
+
+  return html;
 };
