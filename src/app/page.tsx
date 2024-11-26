@@ -4,10 +4,13 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { FormEvent, useState } from "react";
 import { SliderReveal } from "../components/SliderReveal";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [htmlData, setHtmlData] = useState("");
+  const router = useRouter();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -63,6 +66,12 @@ export default function Home() {
         </>
       )}
       {htmlData && <SliderReveal html={htmlData} />}
+      <Button
+        className="fixed top-4 left-4 z-50"
+        onClick={() => router.refresh()}
+      >
+        Atras
+      </Button>
     </div>
   );
 }

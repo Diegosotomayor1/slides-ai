@@ -10,7 +10,6 @@ import RevealMath from "reveal.js/plugin/math/math";
 import RevealNotes from "reveal.js/plugin/notes/notes";
 import RevealSearch from "reveal.js/plugin/search/search";
 import RevealZoom from "reveal.js/plugin/zoom/zoom";
-import { Button } from "./ui/button";
 
 export function SliderReveal({ html }: { html: string }) {
   const deckDivRef = useRef<HTMLDivElement>(null); // Referencia al contenedor de Reveal.js
@@ -61,14 +60,11 @@ export function SliderReveal({ html }: { html: string }) {
   }, []);
 
   return (
-    <>
-      <div className="reveal" ref={deckDivRef}>
-        <div
-          className="slides bg-cover bg-center bg-no-repeat"
-          dangerouslySetInnerHTML={{ __html: html }} // Renderizado de HTML puro
-        />
-      </div>
-      <Button className="fixed top-4 left-4 z-50">Atras</Button>
-    </>
+    <div className="reveal" ref={deckDivRef}>
+      <div
+        className="slides bg-cover bg-center bg-no-repeat"
+        dangerouslySetInnerHTML={{ __html: html }} // Renderizado de HTML puro
+      />
+    </div>
   );
 }
